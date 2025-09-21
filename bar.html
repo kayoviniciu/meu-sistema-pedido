@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sistema de Pedido - Isaias Bar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="marca text-center my-4"><span class="fs-3 fw-bold">Isaias Bar</span></div>
+
+  <div class="container">
+    <div class="d-flex justify-content-end mb-3">
+      <button id="temaBtn" class="btn btn-outline-secondary">🌙 Alternar Tema</button>
+    </div>
+
+    <h1 class="text-center mb-4">Sistema de Pedido</h1>
+
+    <form id="formPedido" class="mb-4">
+      <div class="mb-3">
+        <label for="opcao" class="form-label">Prato ou Bebida:</label>
+        <select id="opcao" class="form-select" required>
+          <option value="">Selecione...</option>
+          <optgroup label="Pratos">
+            <option>Arrumadinho</option>
+            <option>Feijoada</option>
+            <option>Dobradinha</option>
+            <option>Almoço normal com carne</option>
+            <option>Almoço normal com galinha guisada</option>
+            <option>Porção de cabidela</option>
+            <option>Porção de carne</option>
+            <option>Galinha guisada</option>
+            <option>Almoço com cabidela</option>
+            <option>Empada</option>
+          </optgroup>
+          <optgroup label="Bebidas">
+            <option>Coca 2L</option>
+            <option>Cola 1L</option>
+            <option>Cola lata</option>
+            <option>Água</option>
+            <option>Pitu</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="tipoPedido" class="form-label">Tipo de Pedido:</label>
+        <select id="tipoPedido" class="form-select" required>
+          <option value="">Selecione...</option>
+          <option value="Mesa">Mesa</option>
+          <option value="Viagem">Viagem</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="mesa" class="form-label">Número da Mesa:</label>
+        <input type="number" id="mesa" class="form-control" min="1" placeholder="Opcional, se for viagem pode deixar vazio" />
+      </div>
+
+      <div class="mb-3">
+        <label for="valor" class="form-label">Valor (R$):</label>
+        <input type="number" id="valor" class="form-control" min="0" step="0.01" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="quantidade" class="form-label">Quantidade:</label>
+        <input type="number" id="quantidade" class="form-control" min="1" value="1" required />
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Adicionar Pedido</button>
+        <button type="button" id="novoPedido" class="btn btn-secondary">Novo Pedido</button>
+      </div>
+    </form>
+
+    <input id="busca" class="form-control mb-3" type="text" placeholder="Buscar item..." />
+
+    <div id="aviso" class="text-center text-danger mb-3 fw-semibold"></div>
+
+    <div id="resumo" class="border rounded p-3">
+      <h2 class="mb-3">Resumo</h2>
+      <div id="pedidosSeparados"></div>
+      <div id="totalDia" class="fw-bold mt-3"></div>
+      <div class="d-flex gap-2 mt-3">
+        <button id="exportarCSV" class="btn btn-success">Exportar CSV</button>
+        <button id="imprimir" class="btn btn-info text-white">Imprimir</button>
+        <button id="fecharDia" class="btn btn-danger">Fechar Dia</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let todosPedidos = [[]];
+    let pedidoAtual = 0;
+
+    const form = document.getElementById("formPedido");
+    const pedidosSeparados = document.getElementById("pedidosSeparados");
+    const totalDia = document.getElementById("totalDia");
+    const aviso = document.getElementById("aviso");
+    const buscaInput = document.getElementById("busca");
+    const temaBtn = document.getElementById("temaBtn");
+
+    function mostrarAviso(msg) {
+      aviso.textContent = msg;
+      setTimeout(() => (aviso.textContent = ""), 2500);
+    }
+
+    function removerItem(pedidoIndex, itemIndex) {
+      if (confirm("Deseja remover este item do pedido?")) {
+        todosPedidos[pedidoIndex].splice(itemIndex, 1);
+        atualizarLista();
+        mostrarAviso("Item removido.");
+      }
+    }
+
+    // Função para adicionar itens em pedidos existentes
+    function adicionarAoPedidoExistente(pedidoIndex) {
+      // Para simplificar, vamos abrir prompts para adicionar o item
+      const opcao = prompt("Digite o nome do item:");
+      if (!opcao) {
+        mostrarAviso("Item não adicionado: nome inválido.");
+        return;
+      }
+
+      let valor = prompt("Digite o valor (R$):");
+      valor = parseFloat(valor.replace(",", "."));
+      if (isNaN(valor) || valor <= 0) {
+        mostrarAviso("Valor inválido.");
+        return;
+      }
+
+      let quantidade = prompt("Digite a quantidade:");
+      quantidade = parseInt(quantidade);
+      if (isNaN(quantidade) || quantidade <= 0) {
+        mostrarAviso("Quantidade inválida.");
+        return;
+      }
+
+      // Vamos manter o tipo de pedido e mesa do primeiro item do pedido para manter coerência
+      const tipoPedido = todosPedidos[pedidoIndex][0]?.tipoPedido || "Mesa";
+      const mesa = todosPedidos[pedidoIndex][0]?.mesa || "—";
+      const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      todosPedidos[pedidoIndex].push({ opcao, tipoPedido, valor, quantidade, mesa, hora });
+      atualizarLista();
+      mostrarAviso("Item adicionado ao pedido!");
+    }
+
+    temaBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      temaBtn.textContent = document.body.classList.contains("dark") ? "☀ Tema Claro" : "🌙 Alternar Tema";
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const opcao = document.getElementById("opcao").value;
+      const tipoPedido = document.getElementById("tipoPedido").value;
+      const valor = parseFloat(document.getElementById("valor").value);
+      const quantidade = parseInt(document.getElementById("quantidade").value);
+      const mesa = document.getElementById("mesa").value || "—";
+      const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      if (!opcao || !tipoPedido || valor <= 0 || quantidade <= 0) {
+        mostrarAviso("Preencha todos os campos corretamente!");
+        return;
+      }
+
+      todosPedidos[pedidoAtual].push({ opcao, tipoPedido, valor, quantidade, mesa, hora });
+      atualizarLista();
+
+      form.reset();
+      document.getElementById("quantidade").value = 1;
+      document.getElementById("opcao").focus();
+      mostrarAviso("Pedido adicionado!");
+    });
+
+    document.getElementById("novoPedido").addEventListener("click", () => {
+      todosPedidos.push([]);
+      pedidoAtual = todosPedidos.length - 1;
+      atualizarLista();
+    });
+
+    document.getElementById("imprimir").addEventListener("click", () => window.print());
+
+    document.getElementById("fecharDia").addEventListener("click", () => {
+      if (confirm("Deseja apagar todos os pedidos do dia?")) {
+        todosPedidos = [[]];
+        pedidoAtual = 0;
+        atualizarLista();
+        mostrarAviso("Pedidos apagados.");
+      }
+    });
+
+    document.getElementById("exportarCSV").addEventListener("click", () => {
+      let csv = "Pedido,Item,Tipo de Pedido,Mesa,Hora,Valor,Quantidade\n";
+      todosPedidos.forEach((pedido, idx) => {
+        pedido.forEach((p) => {
+          csv += `${idx + 1},${p.opcao},${p.tipoPedido},${p.mesa},${p.hora},${p.valor},${p.quantidade}\n`;
+        });
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", "pedidos.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    buscaInput.addEventListener("input", atualizarLista);
+
+    function atualizarLista() {
+      pedidosSeparados.innerHTML = "";
+      let totalGeral = 0;
+      let totalItens = 0;
+      const termoBusca = buscaInput.value.trim().toLowerCase();
+
+      todosPedidos.forEach((pedido, idxPedido) => {
+        if (pedido.length === 0) return;
+
+        // Filtra os itens que correspondem à busca
+        const filtrados = pedido.filter((item) =>
+          item.opcao.toLowerCase().includes(termoBusca)
+        );
+        if (filtrados.length === 0) return;
+
+        let html = `<div class="mb-3 border rounded p-2">
+          <h5>
+            Pedido ${idxPedido + 1} - Mesa: ${filtrados[0].mesa || "—"} (${filtrados[0].tipoPedido})
+            <button class="btn btn-sm btn-success ms-2" onclick="adicionarAoPedidoExistente(${idxPedido})">➕ Adicionar item</button>
+          </h5>
+          <small class="text-muted">Horário do pedido: ${filtrados[0].hora || "—"}</small>
+          <ul class="mt-2">`;
+
+        let totalPedido = 0;
+
+        filtrados.forEach((item, idxItem) => {
+          const subtotal = item.valor * item.quantidade;
+          html += `<li>
+            ${item.quantidade} x ${item.opcao} (${item.tipoPedido}) - R$ ${item.valor.toFixed(2)} = R$ ${subtotal.toFixed(2)}
+            <button class="btn btn-sm btn-danger ms-2" onclick="removerItem(${idxPedido}, ${idxItem})">❌</button>
+          </li>`;
+          totalPedido += subtotal;
+          totalItens += item.quantidade;
+        });
+
+        html += `</ul><strong>Total: R$ ${totalPedido.toFixed(2)}</strong></div>`;
+        pedidosSeparados.innerHTML += html;
+        totalGeral += totalPedido;
+      });
+
+      totalDia.textContent = `Total do Dia: R$ ${totalGeral.toFixed(2)} (${totalItens} itens)`;
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    
+  </script>
+</body>
+</html>
