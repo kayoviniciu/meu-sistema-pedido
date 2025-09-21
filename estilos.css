@@ -1,1 +1,196 @@
+:root {
+      --cor-principal: #ffe066;
+      --cor-fundo: #fffbe6;
+      --cor-texto: #333;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, var(--cor-fundo), #fff9c4);
+      color: var(--cor-texto);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      --cor-fundo: #121212;
+      --cor-texto: #eee;
+      background: var(--cor-fundo);
+      color: var(--cor-texto);
+    }
+    body.dark .container {
+      background: #b61717;
+      box-shadow: 0 0 10px #333;
+    }
+    body.dark button {
+      background: #444;
+      color: white;
+    }
+    .marca {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .marca span {
+      font-size: 8vw;
+      color: var(--cor-principal);
+      opacity: 0.18;
+      font-weight: bold;
+      transform: rotate(-20deg);
+      text-shadow: 2px 2px 8px #fffde7;
+    }
+    .container {
+      background: #fff;
+      padding: 30px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+      z-index: 1;
+      max-width: 600px;
+      width: 100%;
+      transition: background 0.3s, color 0.3s;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+    input, select {
+      width: 100%;
+      margin: 6px 0 12px;
+      padding: 14px;
+      font-size: 1.1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: background 0.3s, color 0.3s;
+    }
+    button {
+      width: 100%;
+      background: var(--cor-principal);
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1em;
+      font-weight: bold;
+      padding: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #ffdd55;
+    }
+    .pedido-separado {
+      border-bottom: 1px dashed #ccc;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      text-align: left;
+    }
+    #totalDia {
+      font-weight: bold;
+      font-size: 1.3em;
+      margin-top: 20px;
+      text-align: center;
+    }
+    #aviso {
+      text-align: center;
+      font-weight: bold;
+      color: green;
+      margin-top: 10px;
+      min-height: 22px;
+      font-size: 1.1em;
+      user-select: none;
+    }
+    #busca {
+      margin: 15px 0;
+      padding: 12px;
+      font-size: 1.1em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #temaBtn {
+      margin-bottom: 15px;
+      background: #333;
+      color: #fff;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      max-width: 200px;
+      align-self: flex-end;
+      transition: background 0.3s;
+    }
+    #temaBtn:hover {
+      background: #555;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
+      }
+      button {
+        padding: 14px;
+        font-size: 1em;
+      }
+      input, select, #busca {
+        font-size: 1em;
+        padding: 12px;
+      }
+      #temaBtn {
+        max-width: 100%;
+        margin-bottom: 20px;
+      }
+    }
 
+    body.dark {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    body.dark .card,
+    body.dark .form-control,
+    body.dark .form-select {
+      background-color: #1f1f1f;
+      color: #f1f1f1;
+      border-color: #444;
+    }
+    body.dark .btn-outline-secondary {
+      color: #f1f1f1;
+      border-color: #f1f1f1;
+    }
+    body.dark .btn-outline-secondary:hover {
+      background-color: #f1f1f1;
+      color: #121212;
+    }
+  
+  body.dark {
+    background-color: #121212;
+    color: #eee;
+  }
+  body.dark input, body.dark select, body.dark button {
+    background-color: #333;
+    color: #eee;
+  }
+  body.dark .btn-outline-secondary {
+    color: #eee;
+    border-color: #eee;
+  }
+  #ranking {
+    margin-top: 1rem;
+  }
+  #ranking ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  #ranking ul li {
+    margin-bottom: 0.3rem;
+  }
